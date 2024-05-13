@@ -1,40 +1,5 @@
 /// <reference types="@figma/plugin-typings" />
 
-// This plugin will open a window to prompt the user to enter a number, and
-// it will then create that many rectangles on the screen.
-
-// This file holds the main code for plugins. Code in this file has access to
-// the *figma document* via the figma global object.
-// You can access browser APIs in the <script> tag inside "ui.html" which has a
-// full browser environment (See https://www.figma.com/plugin-docs/how-plugins-run).
-
-// This shows the HTML page in "ui.html".
-// figma.showUI(__html__);
-
-// Calls to "parent.postMessage" from within the HTML page will trigger this
-// callback. The callback will be passed the "pluginMessage" property of the
-// posted message.
-// figma.ui.onmessage = msg => {
-//   // One way of distinguishing between different types of messages sent from
-//   // your HTML page is to use an object with a "type" property like this.
-//   if (msg.type === 'create-rectangles') {
-//     const nodes: SceneNode[] = [];
-//     for (let i = 0; i < msg.count; i++) {
-//       const rect = figma.createRectangle();
-//       rect.x = i * 150;
-//       rect.fills = [{type: 'SOLID', color: {r: 1, g: 0.5, b: 0}}];
-//       figma.currentPage.appendChild(rect);
-//       nodes.push(rect);
-//     }
-//     figma.currentPage.selection = nodes;
-//     figma.viewport.scrollAndZoomIntoView(nodes);
-//   }
-
-//   // Make sure to close the plugin when you're done. Otherwise the plugin will
-//   // keep running, which shows the cancel button at the bottom of the screen.
-//   figma.closePlugin();
-// };
-
 // このプラグインは登録されたStylesの色情報を取得し、コンソールに表示します。
 
 figma.showUI(__html__);
@@ -107,22 +72,11 @@ figma.ui.onmessage = async (msg: any) => {
     const result = figma.variables.getLocalVariables().filter(item => {
       return [...variableColors].some(b => b.id === item.id);
     });
-    // result.forEach(item => {
-    //   // console.log('item', item);
-    //   // console.log(item.name);
-    //   // console.log(rgbToHex(item.valuesByMode["14:0"]));
-    //   // const testObj = {name: 'hogehoge', value: 'fugafuga'}
-    //   const newObj = {
-    //     [item.name]: rgbToHex(item.valuesByMode["14:0"])
-    //   };
-    // })
+
     const newObj = result.map(item => {
       return {[item.name]: rgbToHex(item.valuesByMode["14:0"])}
     })
     const mergedObj = newObj.reduce((acc, curr) => ({...acc, ...curr}), {});
-    // console.log('mergedObj',mergedObj);
-
-
     const lastObj = {};
     for (let key in InputObject) {
       if (mergedObj.hasOwnProperty(key)) {
@@ -131,7 +85,6 @@ figma.ui.onmessage = async (msg: any) => {
         lastObj[key] = InputObject[key];
       }
     }
-    console.log(lastObj);
 
     // オブジェクトをSCSS形式の文字列に変換する関数
     function objectToSCSS(obj) {
@@ -154,13 +107,3 @@ figma.ui.onmessage = async (msg: any) => {
     figma.ui.postMessage({ type: 'display-message', message: scssString });
   }
 };
-
-// const AAA = {
-//   'original-section-title-main-color': '#ff551f',
-//   'original-section-border-main-color': '#0235b8',
-//   'original-section-font-main-color': '#333333'
-// }
-// const BBB = {
-//   'original-section-title-main-color': '#111111',
-//   'original-section-border-main-color': '#222222'
-// }

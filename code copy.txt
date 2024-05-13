@@ -1,0 +1,163 @@
+/// <reference types="@figma/plugin-typings" />
+
+// This plugin will open a window to prompt the user to enter a number, and
+// it will then create that many rectangles on the screen.
+
+// This file holds the main code for plugins. Code in this file has access to
+// the *figma document* via the figma global object.
+// You can access browser APIs in the <script> tag inside "ui.html" which has a
+// full browser environment (See https://www.figma.com/plugin-docs/how-plugins-run).
+
+// This shows the HTML page in "ui.html".
+// figma.showUI(__html__);
+
+// Calls to "parent.postMessage" from within the HTML page will trigger this
+// callback. The callback will be passed the "pluginMessage" property of the
+// posted message.
+// figma.ui.onmessage = msg => {
+//   // One way of distinguishing between different types of messages sent from
+//   // your HTML page is to use an object with a "type" property like this.
+//   if (msg.type === 'create-rectangles') {
+//     const nodes: SceneNode[] = [];
+//     for (let i = 0; i < msg.count; i++) {
+//       const rect = figma.createRectangle();
+//       rect.x = i * 150;
+//       rect.fills = [{type: 'SOLID', color: {r: 1, g: 0.5, b: 0}}];
+//       figma.currentPage.appendChild(rect);
+//       nodes.push(rect);
+//     }
+//     figma.currentPage.selection = nodes;
+//     figma.viewport.scrollAndZoomIntoView(nodes);
+//   }
+
+//   // Make sure to close the plugin when you're done. Otherwise the plugin will
+//   // keep running, which shows the cancel button at the bottom of the screen.
+//   figma.closePlugin();
+// };
+
+// このプラグインは登録されたStylesの色情報を取得し、コンソールに表示します。
+
+figma.showUI(__html__);
+
+// figma.ui.onmessage = async msg => {
+//   if (msg.type === 'get-colors') {
+//     const styles = figma.variables.getLocalVariables();
+
+//     // UIに色情報を送信
+//     figma.ui.postMessage({ type: 'colors' });
+//   }
+
+//   figma.closePlugin();
+// };
+
+// // RGBをHEXに変換する関数
+// function rgbToHex(r: number, g: number, b: number): string {
+//   const toHex = (c: number) => Math.round(c * 255).toString(16).padStart(2, '0');
+//   return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
+// }
+
+// figma.ui.onmessage = async msg => {
+//   if (msg.type === 'get-colors') {
+//     const variables = figma.variables.getLocalVariables();
+
+//     // 色に関連する変数のみをフィルタリング
+//     const colorVariables = variables.filter(variable => variable.resolvedType === 'COLOR');
+
+//     // // valuesByModeの構造をコンソールに出力
+//     // console.log(colorVariables.map(v => v.valuesByMode['14:0']));
+
+//         // valuesByModeの実際の値をコンソールに出力
+//         colorVariables.forEach(variable => {
+//           const colorValue = variable.valuesByMode['14:0'];
+//           console.log(colorValue);
+//         });
+
+//     // // 色コードの文字列を作成
+//     // let colorsString = "";
+//     // colorVariables.forEach((variable, index) => {
+//     //   // RGB値をCSSのhexコードに変換
+//     //   const color = variable.valuesByMode['14.0']; // RGBの値を取得
+//     //   const hexColor = rgbToHex(color.r, color.g, color.b);
+
+//     //   // 文字列に追加
+//     //   colorsString += `$color${index + 1}: ${hexColor};\n`;
+//     // });
+
+//     // // UIに色情報を送信
+//     // figma.ui.postMessage({ type: 'colors', colorsString });
+//     // console.log(colorsString);
+    
+//   }
+
+//   figma.closePlugin();
+// };
+
+// // RGB値をHEXコードに変換する関数
+// function rgbToHex(r:any, g:any, b:any) {
+//   const toHex = (c:any) => Math.round(c * 255).toString(16).padStart(2, '0');
+//   return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
+// }
+
+figma.ui.onmessage = async (msg: any) => {
+  let hogehoge:any;
+  if (msg.type === 'get-colors') {
+    const variables: any[] = figma.variables.getLocalVariables();
+
+    // 色に関連する変数のみをフィルタリング
+    const colorVariables = variables.filter(variable => variable.resolvedType === 'COLOR');
+
+    // 色コードの文字列を作成
+    interface Obj {
+      [prop: string]: any// これを記述することで、どんなプロパティでも持てるようになる
+    }
+    let colorsString:Obj = {};
+    colorVariables.forEach((variable, index) => {
+      // RGB値を取得
+      const color: any = variable.valuesByMode['14:0'];
+      const hexColor: string = rgbToHex(color.r, color.g, color.b);
+
+      // 文字列に追加
+      colorsString[`color${index+1}`] = hexColor;
+    });
+
+    interface subPageColorVariables {
+      [prop: string]: any
+    }
+    let subPageColorVariables:subPageColorVariables = {
+      originalHogeHoge: colorsString.color1,
+      originalHogeHoge2: colorsString.color2,
+      originalHogeHoge3: '#000',
+      originalHogeHoge4: colorsString.color3,
+      originalHogeHoge5: '#333',
+    }
+
+    // keyを文字列にして文字列連結すればCSSの形にできそう
+    // オブジェクトのキーと値をループして変換する
+    const convertedString = Object.entries(subPageColorVariables).map(([key, value]) => {
+      return `$${key}: "${value}";`;
+    }).join('\n');
+
+    // UIに色情報を送信
+    figma.ui.postMessage({ type: 'colors', subPageColorVariables });
+    console.log(colorsString);
+    console.log(subPageColorVariables);
+    console.log(convertedString);
+    hogehoge = convertedString;
+  }
+  // figma.notify("hello");
+
+  // この例では、メッセージを動的に生成します。
+  const message:any = hogehoge; // 実際にはここで何らかの処理を行い、動的にメッセージを設定します。
+  // UIを表示するコード。HTMLは直接文字列で指定するか、外部ファイルから読み込みます。
+  figma.showUI(__html__, { width: 240, height: 100 });
+  // UIに対してメッセージを送信します。
+  figma.ui.postMessage({ type: 'display-message', message: message });
+
+  // figma.closePlugin();
+};
+
+// RGB値をHEXコードに変換する関数
+function rgbToHex(r: number, g: number, b: number): string {
+  const toHex = (c: number) => Math.round(c * 255).toString(16).padStart(2, '0');
+  return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
+}

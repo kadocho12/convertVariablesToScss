@@ -1,0 +1,36 @@
+<!-- <h2>Rectangle Creator</h2>
+<p>Count: <input id="count" value="5"></p>
+<button id="create">Create</button>
+<button id="cancel">Cancel</button>
+<script>
+
+document.getElementById('create').onclick = () => {
+  const textbox = document.getElementById('count');
+  const count = parseInt(textbox.value, 10);
+  parent.postMessage({ pluginMessage: { type: 'get-colors', count } }, '*')
+}
+
+document.getElementById('cancel').onclick = () => {
+  parent.postMessage({ pluginMessage: { type: 'cancel' } }, '*')
+}
+
+</script> -->
+
+<button id="getColorButton">Get Colors</button>
+<textarea type="text" id="variables-template"></textarea>
+<p id="message"></p>
+
+<script>
+  document.getElementById('getColorButton').addEventListener('click', () => {
+    const inputValue = document.getElementById('variables-template').value;
+    console.log(inputValue);
+    parent.postMessage({ pluginMessage: { type: 'get-colors', value: inputValue } }, '*');
+  });
+  // UI側でメインスクリプトからのメッセージを受信するリスナーを設定
+  window.onmessage = (event) => {
+    const { type, message } = event.data.pluginMessage;
+    if (type === 'display-message') {
+      document.getElementById('message').innerText = message;
+    }
+  };
+</script>
